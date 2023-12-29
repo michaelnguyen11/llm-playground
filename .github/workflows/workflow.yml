@@ -1,0 +1,58 @@
+name: LLM playground lint code and run tests
+
+on: [push]
+
+jobs:
+  # Do sanity check with Python 3.9 and test on the rest
+  sanity_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Analysing the code with pylint
+        run: |
+          python3 -m pip install pylint
+          pylint **/*.py
+
+  test_x86:
+    needs: sanity_check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11", "pypy3.9", "pypy3.10"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.9"
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set Up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Analysing the code with pylint
+        run: |
+          python3 -m pip install pylint
+          pylint $(find . -name "*.py" | xargs)
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test with pytest
+        run: |
+          python3 -m pip install pytest
+          pytest

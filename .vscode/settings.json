@@ -1,0 +1,10 @@
+{
+    "editor.rulers": [120],
+
+    "files.exclude": {
+      "**/*.egg-info": true,
+      "**/.git": true,
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+    }
+}
