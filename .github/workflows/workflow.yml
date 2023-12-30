@@ -50,7 +50,8 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r src/backend/requirements.txt
+          pip install -r src/frontend/requirements.txt
 
       - name: Test with pytest
         run: |
