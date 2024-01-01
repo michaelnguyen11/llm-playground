@@ -18,7 +18,7 @@ jobs:
       - name: Analysing the code with pylint
         run: |
           python3 -m pip install pylint
-          pylint **/*.py
+          pylint $(find . -name "*.py" | xargs)
 
   test_x86:
     needs: sanity_check
