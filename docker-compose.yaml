@@ -3,15 +3,14 @@ services:
   fastapi:
     container_name: server
     build: src/backend/.
-    command: "uvicorn main:app --host 0.0.0.0 --port 8080"
     ports:
       - "8080:8080"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    env_file:
+      - .env
 
-  streamlit:
-    container_name: app
-    build: src/frontend/.
-    command: "streamlit run --server.port 8081 --server.enableCORS false app.py"
-    ports:
-      - "8081:8081"
+  # streamlit:
+  #   container_name: app
+  #   build: src/frontend/.
+  #   command: "streamlit run --server.port 8081 --server.enableCORS false app.py"
+  #   ports:
+  #     - "8081:8081"
