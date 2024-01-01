@@ -1,7 +1,10 @@
-from utils.callbacks import StreamingLLMCallbackHandler
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from integrations.openai import get_openai_chain, settings
-from schemas.message import ChatResponse
+from src.integrations.openai import get_openai_chain, settings
+from src.schemas.message import ChatResponse
+from src.utils.callbacks import StreamingLLMCallbackHandler
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -49,8 +52,10 @@ async def websocket_endpoint(websocket: WebSocket):
             end_resp = ChatResponse(sender="bot", message="", type="end")
             await websocket.send_json(end_resp.dict())
     except WebSocketDisconnect:
+        logger.info("WebSocket disconnected")
         manager.disconnect(websocket)
     except Exception as e:
+        logger.error(e)
         resp = ChatResponse(
             sender="bot",
             message="Sorry, something went wrong. Try again.",

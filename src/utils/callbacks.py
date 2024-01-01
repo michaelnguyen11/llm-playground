@@ -1,9 +1,6 @@
-"""Callback handlers used in the app."""
 from typing import Any
-
 from langchain.callbacks.base import AsyncCallbackHandler
-
-from schemas.message import ChatResponse
+from src.schemas.message import ChatResponse
 
 class StreamingLLMCallbackHandler(AsyncCallbackHandler):
     """Callback handler for streaming LLM responses."""

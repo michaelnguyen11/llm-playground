@@ -1,7 +1,7 @@
 import logging
 import sys
 
-APP_LOGGER_NAME = 'llm-playground'
+APP_LOGGER_NAME = 'app'
 
 def setup_logging(logger_name=APP_LOGGER_NAME, file_name=None):
     """

@@ -10,6 +10,7 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
 )
 from pydantic import BaseSettings
+from src.utils.logger import get_logger
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "llm-playground"
@@ -56,6 +57,8 @@ def get_openai_chain(stream_hanlder, tracing: bool = False) -> ConversationChain
         callback_manager=stream_manager,
         verbose=True,
     )
+    logger = get_logger(__name__)
+    logger.info("Created OpenAI Streaming with model_name {}, temperature {}, max_tokens {}".format(settings.MODEL_NAME, settings.TEMPERATURE, settings.MAX_TOKENS))
 
     memory = ConversationBufferMemory(return_messages=True)
 
