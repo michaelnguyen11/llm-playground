@@ -1,6 +1,6 @@
 from utils.callbacks import StreamingLLMCallbackHandler
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from integrations.openai import get_openai_chain
+from integrations.openai import get_openai_chain, settings
 from schemas.message import ChatResponse
 
 router = APIRouter()
@@ -8,6 +8,10 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    if not settings.OPENAI_API_KEY.startswith("sk-"):
+            await websocket.send_json({"error": "OPENAI_API_KEY is not set"})
+            return
+
     stream_hanlder = StreamingLLMCallbackHandler(websocket)
     conversation_chain = get_openai_chain(stream_hanlder)
     while True:

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator
 
 class ChatResponse(BaseModel):
+    """Chat response schema."""
     sender: str
     message: str
     type: str

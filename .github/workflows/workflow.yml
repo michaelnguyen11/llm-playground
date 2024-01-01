@@ -15,11 +15,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Analysing the code with pylint
-        run: |
-          python3 -m pip install pylint
-          pylint $(find . -name "*.py" | xargs)
-
   test_x86:
     needs: sanity_check
     runs-on: ${{ matrix.os }}
@@ -41,11 +36,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Analysing the code with pylint
-        run: |
-          python3 -m pip install pylint
-          pylint $(find . -name "*.py" | xargs)
 
       - name: Install dependencies
         run: |

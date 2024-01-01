@@ -1,11 +1,7 @@
 from langchain.chains import ConversationChain
 from langchain.callbacks.manager import AsyncCallbackManager
 from langchain.callbacks.tracers import LangChainTracer
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.chat_vector_db.prompts import CONDENSE_QUESTION_PROMPT, QA_PROMPT
-from langchain.chains.llm import LLMChain
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -13,6 +9,19 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "llm-playground"
+    API_VERSION: str = "v1"
+    API_V1_STR: str = f"/api/{API_VERSION}"
+    OPENAI_API_KEY: str
+    MODEL_NAME: str = "gpt-3.5-turbo"
+    TEMPERATURE: float = 0.7
+    MAX_TOKENS: int = 2000
+
+
+settings = Settings()
 
 def get_openai_chain(stream_hanlder, tracing: bool = False) -> ConversationChain:
     """
@@ -39,10 +48,10 @@ def get_openai_chain(stream_hanlder, tracing: bool = False) -> ConversationChain
         manager.add_handler(tracer)
         stream_manager.add_handler(tracer)
 
-    streaming_llm = OpenAI(
-        model_name="gpt-3.5-turbo",
-        temperature=0.7,
-        max_tokens=2000,
+    streaming_llm = ChatOpenAI(
+        model_name=settings.MODEL_NAME,
+        temperature=settings.TEMPERATURE,
+        max_tokens=settings.MAX_TOKENS,
         streaming=True,
         callback_manager=stream_manager,
         verbose=True,

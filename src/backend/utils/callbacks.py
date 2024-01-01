@@ -12,5 +12,7 @@ class StreamingLLMCallbackHandler(AsyncCallbackHandler):
         self.websocket = websocket
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        """Run on new LLM token. Only available when streaming is enabled."""
+
         resp = ChatResponse(sender="bot", message=token, type="stream")
         await self.websocket.send_json(resp.dict())
