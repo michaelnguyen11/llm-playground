@@ -2,6 +2,6 @@ fastapi==0.99.1
 openai==0.27.10
 pydantic==1.10.13
 uvicorn==0.25.0
-langchain==0.0.353
+langchain==0.0.349
 jinja2==3.1.2
 websockets==12.0

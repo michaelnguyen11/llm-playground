@@ -1,6 +1,5 @@
-llama-index
-pypdf
-sentence-transformers
-ragas
-pandas
-argparse
+llama-index==0.9.24
+pypdf==3.17.4
+sentence-transformers==2.2.2
+ragas==0.0.22
+pandas==2.1.4
