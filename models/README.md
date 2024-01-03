@@ -2,13 +2,23 @@
 In this repository, I want to extract knowledge from the documents to create a custom dataset using GPT-4 for fine-tuning the GPT-3.5.
 The aim is to distill knowledge from GPT-4 to GPT-3.5 so that a smaller GPT-3.5 becomes closer to GPT-4 performance in specific subject.
 
-## Setup environment
+## Fine-tuning results
+With the dataset in `datasets` folder, the `answer_relevancy` score and `faithfulness` score of `ragas` evaluation framework increased dramatically in the fine-tuned GPT-3.5-turbo-1106 model, compare to the baseline GPT-3.5-turbo-1106 model, nearly reach to GPT-4-1106-preview performance.
+
+Model Name | Answer Relevancy Score| Faithfulness Score
+--- | --- | ---
+GPT-3.5-turbo-1106 | 0.8806072429800716 | 0.8691269841269841
+Fine-tuned GPT-3.5-turbo-1106 | 0.9030882416787889 | 0.9191919191919191
+gpt-4-1106-preview | 0.9067527587830269 | 0.9327409627409627
+
+
+### Setup environment
 The neccessary packages for this module is define at `requirements.txt` file.
 ```
 pip install requirements.txt
 ```
 
-## Generate the dataset
+### Generate the dataset
 Ensure that you exported the `OPENAI_API_KEY` as an environment variable.
 
 To generate the dataset, it includes 2 steps : 
@@ -28,7 +38,7 @@ python3 data_preparation.py --dataset --train_path /path/to/train_questions.txt 
 
 Please check the `python3 data_preparation.py --help` for the `data_preparation.py` usage.
 
-## Fine-tuning
+### Fine-tuning
 After creating the fine-tuning dataset, launch a fine-tuning job to fine-tune the GPT-3.5-turbo-1106 model:
 ```
 python3 launch_training.py /path/to/finetune_dataset.jsonl
@@ -39,7 +49,7 @@ curl https://api.openai.com/v1/fine_tuning/jobs/your_ftjob_id \
   -H "Authorization: Bearer $OPENAI_API_KEY"
 ```
 
-## Evaluation
+### Evaluation
 For the evaluation, I use the [ragas evaluation framework](https://github.com/explodinggradients/ragas) to evaluate the baseline for GPT-3.5-turbo-1106 model, as well as the fine-tuned GPT-3.5-turbo-1106 model with the generated evaluation questions in previous section.
 
 I will use 2 metrics from `ragas` evaluation framework to evaluate the models:
@@ -66,11 +76,3 @@ python3 launch_evaluation.py --eval_gpt4 --val_path /path/to/eval_questions.txt
 ```
 python3 launch_evaluation.py --compare_response --val_path /path/to/eval_questions.txt --response_file /path/to/compare_responses.csv
 ```
-
-With the dataset in `datasets` folder, the `answer_relevancy` score and `faithfulness` score increased dramatically in the fine-tuned GPT-3.5-turbo-1106 baseline model, compare to the baseline GPT-3.5-turbo-1106 model, nearly reach to GPT-4-1106-preview performance.
-
-Model Name | Answer Relevancy Score| Faithfulness Score
---- | --- | ---
-GPT-3.5-turbo-1106 | 0.8806072429800716 | 0.8691269841269841
-Fine-tuned GPT-3.5-turbo-1106 | 0.9030882416787889 | 0.9191919191919191
-gpt-4-1106-preview | 0.9067527587830269 | 0.9327409627409627
