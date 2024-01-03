@@ -1,6 +1,8 @@
 import os
 import sys
 import time
+from datetime import datetime
+import json
 
 import openai
 from openai import OpenAI
@@ -21,7 +23,12 @@ def launch_training(data_path: str) -> None:
             file=f,
             purpose="fine-tune",
         )
-    
+
+    # TODO: save output to json file
+    # client_output_metadata = 'openai_training_metadata_' + str(datetime.now().strftime('%Y_%m_%d_%H_%M_%S')) + '.json'
+    # with open(client_output_metadata, 'w') as f:
+    #     json.dump(output, f)
+
     print("File uploaded. Launching training job with information : {}".format(output))
 
     # launch training
