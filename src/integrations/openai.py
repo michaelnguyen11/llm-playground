@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = f"/api/{API_VERSION}"
     OPENAI_API_KEY: str = "sk-..."
     MODEL_NAME: str = "gpt-3.5-turbo"
-    TEMPERATURE: float = 0.7
-    MAX_TOKENS: int = 2000
+    TEMPERATURE: float = 0.3
+    MAX_TOKENS: int = 2048
 
 
 settings = Settings()

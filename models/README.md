@@ -12,13 +12,13 @@ Fine-tuned GPT-3.5-turbo-1106 | 0.9030882416787889 | 0.9191919191919191
 gpt-4-1106-preview | 0.9067527587830269 | 0.9327409627409627
 
 
-### Setup environment
+## Setup environment
 The neccessary packages for this module is define at `requirements.txt` file.
 ```
 pip install requirements.txt
 ```
 
-### Generate the dataset
+## Generate the dataset
 Ensure that you exported the `OPENAI_API_KEY` as an environment variable.
 
 To generate the dataset, it includes 2 steps : 
@@ -38,7 +38,7 @@ python3 data_preparation.py --dataset --train_path /path/to/train_questions.txt 
 
 Please check the `python3 data_preparation.py --help` for the `data_preparation.py` usage.
 
-### Fine-tuning
+## Fine-tuning
 After creating the fine-tuning dataset, launch a fine-tuning job to fine-tune the GPT-3.5-turbo-1106 model:
 ```
 python3 launch_training.py /path/to/finetune_dataset.jsonl
@@ -49,7 +49,7 @@ curl https://api.openai.com/v1/fine_tuning/jobs/your_ftjob_id \
   -H "Authorization: Bearer $OPENAI_API_KEY"
 ```
 
-### Evaluation
+## Evaluation
 For the evaluation, I use the [ragas evaluation framework](https://github.com/explodinggradients/ragas) to evaluate the baseline for GPT-3.5-turbo-1106 model, as well as the fine-tuned GPT-3.5-turbo-1106 model with the generated evaluation questions in previous section.
 
 I will use 2 metrics from `ragas` evaluation framework to evaluate the models:
