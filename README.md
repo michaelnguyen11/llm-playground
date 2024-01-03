@@ -12,6 +12,7 @@ In the project, I used Langchain build to a conversation chain with memory and O
 
 ## Folder Structure
 
+```bash
 llm-playground
     ├───models <- dataset generation and fine-tuning GPT models.
     ├───src <- chat application using FastAPI with a WebSocket endpoint to interact with the GPT models.
@@ -21,6 +22,7 @@ llm-playground
     │   ├───templates <- Tailwind CSS UI.
     │   └───utils <- ultility scripts.
     └───tests <- unittests for the project.
+```
 
 ## Installation
 
