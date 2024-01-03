@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "llm-playground"
     API_VERSION: str = "v1"
     API_V1_STR: str = f"/api/{API_VERSION}"
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: str = "sk-..."
     MODEL_NAME: str = "gpt-3.5-turbo"
     TEMPERATURE: float = 0.7
     MAX_TOKENS: int = 2000

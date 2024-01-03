@@ -6,9 +6,6 @@ from unittest.mock import AsyncMock
 
 from unittest.mock import patch
 
-### Remind to read again Copilot chat for the test_routers.py file
-
-os.environ["OPENAI_API_KEY"] = "sk-dummy-key"
 @pytest.mark.asyncio
 @patch('src.api.routers.get_openai_chain')
 @patch('src.api.routers.StreamingLLMCallbackHandler')
