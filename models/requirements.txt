@@ -3,3 +3,4 @@ pypdf
 sentence-transformers
 ragas
 pandas
+argparse

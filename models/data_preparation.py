@@ -1,4 +1,5 @@
 import os
+import argparse
 from typing import List
 import openai
 from llama_index import SimpleDirectoryReader, ServiceContext, Document, VectorStoreIndex
@@ -83,7 +84,26 @@ def dataset_generator(
 
     finetuning_handler.save_finetuning_events(output_finetuning_file)
 
-if __name__ == '__main__':
+def parge_args():
+    parser = argparse.ArgumentParser(description="Dataset preparation for fine-tuning")
+    parser.add_argument("-q", "--question", action="store_true",
+                        help="Generate train/val questions using GPT models")
+    parser.add_argument("-d", "--dataset", action="store_true",
+                        help="Generate train/val datasets using GPT models")
+    parser.add_argument("-tp", "--train_path", type=str, default="datasets/train_questions_gpt4_generate.txt",
+                        help="Path to save train questions in .txt format")
+    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions_gpt4_generate.txt",
+                        help="Path to save val questions in .txt format")  
+    parser.add_argument("-ftp", "--finetune_path", type=str, default="datasets/finetuning_events_gpt4_100_questions.jsonl",
+                        help="Path to save finetuning events in .jsonl format")
+    args = parser.parse_args()
+
+    return args
+
+
+def main():
+    args = parge_args()
+
     documents = load_documents(["docs/Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf"])
     question_gen_query = (
         "You are a Teacher/ Professor. Your task is to setup "
@@ -95,12 +115,17 @@ if __name__ == '__main__':
     # service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo-1106", temperature=0.3))
     service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-4-1106-preview", temperature=0.3))
     
-    questions_generator(service_context,
-                        documents,
-                        question_gen_query,
-                        train_questions_file='datasets/train_questions_gpt4_generate.txt',
-                        eval_questions_file='datasets/eval_questions_gpt4_generate.txt')
+    if args.question:
+        questions_generator(service_context,
+                            documents,
+                            question_gen_query,
+                            train_questions_file=args.train_path,
+                            eval_questions_file=args.val_path)
+    elif args.dataset:
+        dataset_generator(documents,
+                          train_questions_file=args.train_path,
+                          output_finetuning_file=args.finetune_path)
 
-    dataset_generator(documents,
-                      train_questions_file='datasets/train_questions_gpt4_generate.txt',
-                      output_finetuning_file='datasets/finetuning_events_gpt4_100_questions.jsonl')
+
+if __name__ == '__main__':
+    main()

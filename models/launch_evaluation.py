@@ -1,6 +1,7 @@
 import os
-import openai
 import pandas as pd
+import argparse
+import openai
 from llama_index import ServiceContext, VectorStoreIndex, SimpleDirectoryReader
 from llama_index.llms import OpenAI
 
@@ -101,7 +102,25 @@ def get_response(
     return answer
 
 
-if __name__ == '__main__':
+def parge_args():
+    parser = argparse.ArgumentParser(description="Dataset preparation for fine-tuning")
+    parser.add_argument("-eb", "--eval_baseline", action="store_true",
+                        help="Evaluate baseline for GPT-3.5-turbo model")
+    parser.add_argument("-ef", "--eval_finetuned", action="store_true",
+                        help="Evaluate GPT-3.5-turbo fine tuned model")
+    parser.add_argument("-e4", "--eval_gpt4", action="store_true",
+                        help="Evaluate GPT-4 model")
+    parser.add_argument("-cr", "--compare_response", action="store_true",
+                        help="Compare different responses between GPT-3.5-turbo baseline, finetuned and GPT-4 models")
+    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions_gpt4_generate.txt",
+                        help="Path to save val questions in .txt format")
+    parser.add_argument("-rf", "--response_file", type=str, default="compare_responses.csv",
+                        help="Save compare responses between models in .csv format")
+    args = parser.parse_args()
+
+    return args
+
+def main():
     documents = load_documents(["docs/Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf"])
 
     gpt_35_baseline = 'gpt-3.5-turbo-1106'
@@ -111,47 +130,49 @@ if __name__ == '__main__':
     gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:aitomatic-inc:hiep:8cuu5f77'
     gpt_4_baseline = 'gpt-4-1106-preview'
 
-    gpt_35_baseline_result = evaluate_gpt_model(documents=documents,
-                                                model_name=gpt_35_baseline,
-                                                eval_questions_file="datasets/eval_questions_gpt4_generate.txt")
-    gpt_35_tuned_result = evaluate_gpt_model(documents=documents,
-                                             model_name=gpt_35_tuned,
-                                             eval_questions_file="datasets/eval_questions_gpt4_generate.txt")
-    gpt_4_baseline_result = evaluate_gpt_model(documents=documents,
-                                               model_name=gpt_4_baseline,
-                                               eval_questions_file="datasets/eval_questions_gpt4_generate.txt")
+    args = parge_args()
+    
+    if args.eval_baseline:
+        gpt_35_baseline_result = evaluate_gpt_model(documents=documents,
+                                                    model_name=gpt_35_baseline,
+                                                    eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_35_baseline, gpt_35_baseline_result))
+    elif args.eval_finetuned:
+        gpt_35_tuned_result = evaluate_gpt_model(documents=documents,
+                                                 model_name=gpt_35_tuned,
+                                                 eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_35_tuned, gpt_35_tuned_result))
+    elif args.eval_gpt4:
+        # Not neccessary to evaluate GPT-4 model because it is not fine-tuned
+        gpt_4_baseline_result = evaluate_gpt_model(documents=documents,
+                                                   model_name=gpt_4_baseline,
+                                                   eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_4_baseline, gpt_4_baseline_result))
+    elif args.compare_response:
+        question = get_question(questions_file=args.val_path, question_number=12)
+        gpt_35_answer = get_response(documents=documents,
+                                    model_name=gpt_35_baseline,
+                                    question=question)
+        gpt_35_tuned_answer = get_response(documents=documents,
+                                        model_name=gpt_35_tuned,
+                                        question=question)
+        gpt_4_baseline_answer = get_response(documents=documents,
+                                            model_name=gpt_4_baseline,
+                                            question=question)
 
-    print('Evaluation model {} with Ragas : {}'.format(gpt_35_baseline, gpt_35_baseline_result))
-    print('Evaluation model {} with Ragas : {}'.format(gpt_35_tuned, gpt_35_tuned_result))
-    print('Evaluation model {} with Ragas : {}'.format(gpt_4_baseline, gpt_4_baseline_result))
+        # Let's quickly compare the differences in responses,
+        # to demonstrate that fine tuning did indeed change something.
+        eval_df = pd.DataFrame(
+            {
+                "Question": question,
+                "Model Name": [gpt_35_baseline, gpt_35_tuned, gpt_4_baseline],
+                "Answer": [gpt_35_answer, gpt_35_tuned_answer, gpt_4_baseline_answer],
+            },
+        )
 
-    question = get_question(questions_file="datasets/eval_questions_gpt4_generate.txt", question_number=12)
+        eval_df.to_csv(args.response_file, index=False)
+        print(eval_df)
 
-    gpt_35_answer = get_response(documents=documents,
-                                 model_name=gpt_35_baseline,
-                                 question=question)
-    gpt_35_tuned_answer = get_response(documents=documents,
-                                       model_name=gpt_35_tuned,
-                                       question=question)
-    gpt_4_baseline_answer = get_response(documents=documents,
-                                         model_name=gpt_4_baseline,
-                                         question=question)
 
-    # Let's quickly compare the differences in responses,
-    # to demonstrate that fine tuning did indeed change something.
-    eval_df = pd.DataFrame(
-        {
-            "Question": question,
-            "Model Name": [gpt_35_baseline, gpt_35_tuned, gpt_4_baseline],
-            "Answer": [gpt_35_answer, gpt_35_tuned_answer, gpt_4_baseline_answer],
-            "Ragas Answer Selevancy Score": [gpt_35_baseline_result['answer_relevancy'],
-                                             gpt_35_tuned_result['answer_relevancy'],
-                                             gpt_4_baseline_result['answer_relevancy']],
-            "Ragas Faithfulness Score": [gpt_35_baseline_result['faithfulness'],
-                                         gpt_35_tuned_result['faithfulness'],
-                                         gpt_4_baseline_result['faithfulness']],
-        },
-    )
-
-    eval_df.to_csv('compare_responses.csv', index=False)
-    print(eval_df)
+if __name__ == '__main__':
+    main()
