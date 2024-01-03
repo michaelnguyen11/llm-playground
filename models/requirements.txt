@@ -1,0 +1,4 @@
+llama-index
+pypdf
+sentence-transformers
+ragas

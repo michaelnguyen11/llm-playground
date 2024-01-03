@@ -1,0 +1,30 @@
+What is the method used by the agents to communicate with each other in the Smallville sandbox world?
+What are the four ethical concerns associated with generative agents, as discussed in the context?
+What are some potential applications of generative agents as suggested in the evaluations?
+In the field of artificial intelligence, which paper discusses the early experiments with GPT-4 and its potential as an artificial general intelligence?
+What is the central component of the generative agent architecture described in the provided context?
+What is the main focus of the paper "Generative Agents: Interactive Simulacra of Human Behavior"?
+What approach has been demonstrated to leverage large language models to generate believable behavior, as seen in the example of Social Simulacra?
+What are the key affordances and interactions with generative agents in the Smallville sandbox world, and how do the agents behave in it?
+What is Klaus Mueller's current research topic and where is he studying?
+What is Ayesha Khan's senior thesis topic at Oak Hill College?
+What is the process by which the agents in the Smallville sandbox world interact with each other through natural language?
+What are the proposed principles to mitigate the risk of people forming parasocial relationships with generative agents?
+What role can generative agents play in interactive applications, according to the evaluations mentioned in the context?
+What is the main function of the memory stream in the generative agent architecture described in the provided context?
+What are the three main components of the retrieval function in the architecture of generative agents, as described in the provided context?
+What is the key observation about large language models and their ability to generate believable behavior, as discussed in the context?
+What are some examples of how large language models have been used to generate believable behavior in various applications, as mentioned in the context?
+In the Smallville sandbox world, what natural language description was used to depict the identity of the agent John Lin?
+According to the evaluations, what potential roles can generative agents play in interactive applications, as suggested in the provided context?
+In the field of artificial intelligence, which paper discusses the use of cognitive psychology to understand GPT-3?
+What is the purpose of generative agents as described in the paper "Generative Agents: Interactive Simulacra of Human Behavior"?
+What approach has been demonstrated to leverage large language models to generate believable behavior, as shown in the example of Social Simulacra?
+What is Klaus Mueller studying at Oak Hill College and what is he currently researching?
+What are the proposed principles to address the ethical concerns related to generative agents, as mentioned in the context?
+What role can generative agents play in interactive applications according to the evaluations mentioned in the context?
+How do generative agents leverage large language models to power their behavior, and what key observation supports this approach?
+According to the evaluations, what potential roles can generative agents play in interactive applications, as suggested in the context?
+What is the purpose of the memory stream in the generative agent architecture?
+What are some examples of the applications of large language models in generating believable behavior, as mentioned in the context?
+What are the long-term and short-term plans of the agents mentioned in the context, and how do they maintain consistency with their plans?
