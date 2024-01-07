@@ -1,69 +1,70 @@
+import os
 from langchain.chains import ConversationChain
 from langchain.callbacks.manager import AsyncCallbackManager
-from langchain.callbacks.tracers import LangChainTracer
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import (
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from pydantic import BaseSettings
+
 from src.utils.logger import get_logger
-
-class Settings(BaseSettings):
-    PROJECT_NAME: str = "llm-playground"
-    API_VERSION: str = "v1"
-    API_V1_STR: str = f"/api/{API_VERSION}"
-    OPENAI_API_KEY: str = "sk-..."
-    MODEL_NAME: str = "gpt-3.5-turbo"
-    TEMPERATURE: float = 0.3
-    MAX_TOKENS: int = 2048
+from src.schemas.api_settings import AbstractAPISettings
+from src.utils.callbacks import StreamingLLMCallbackHandler
+from src.integrations.llms import BaseLLM
 
 
-settings = Settings()
+class OpenAISettings(AbstractAPISettings):
+    @classmethod
+    def from_defaults(cls):
+        return OpenAISettings.gpt3_defaults()
 
-def get_openai_chain(stream_hanlder, tracing: bool = False) -> ConversationChain:
-    """
-    Create a ConversationChain for question/answering
-    """
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            SystemMessagePromptTemplate.from_template(
-                "The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know."
-            ),
-            MessagesPlaceholder(variable_name="history"),
-            HumanMessagePromptTemplate.from_template("{input}"),
-        ]
-    )
+    @classmethod
+    def gpt3_defaults(cls):
+        settings = OpenAISettings()
+        settings.type = "openai"
+        settings.key = os.environ.get("OPENAI_API_KEY")
+        settings.model = "gpt-3.5-turbo"
+        settings.max_tokens = 2048
+        settings.temperature = 0.3
+        return settings
 
-    # Create a callback manager
-    manager = AsyncCallbackManager([])
-    # Create a stream callback manager
-    stream_manager = AsyncCallbackManager([stream_hanlder])
 
-    if tracing:
-        tracer = LangChainTracer()
-        tracer.load_default_session()
-        manager.add_handler(tracer)
-        stream_manager.add_handler(tracer)
+class OpenAIBackend(BaseLLM):
+    def __init__(self, api_settings: OpenAISettings = None):
+        if api_settings is None:
+            self.api_settings = OpenAISettings.from_defaults()
+        else:
+            self.api_settings = api_settings
 
-    streaming_llm = ChatOpenAI(
-        model_name=settings.MODEL_NAME,
-        temperature=settings.TEMPERATURE,
-        max_tokens=settings.MAX_TOKENS,
-        streaming=True,
-        callback_manager=stream_manager,
-        verbose=True,
-    )
-    logger = get_logger(__name__)
-    logger.info("Created OpenAI Streaming with model_name {}, temperature {}, max_tokens {}".format(settings.MODEL_NAME, settings.TEMPERATURE, settings.MAX_TOKENS))
+    def get_chain(
+        self, stream_hanlder: StreamingLLMCallbackHandler
+    ) -> ConversationChain:
+        """
+        Retrieves a ConversationChain object for streaming LLM.
+        """
+        # Create a stream callback manager
+        stream_manager = AsyncCallbackManager([stream_hanlder])
 
-    memory = ConversationBufferMemory(return_messages=True)
+        streaming_llm = ChatOpenAI(
+            model_name=self.api_settings.model,
+            temperature=self.api_settings.temperature,
+            max_tokens=self.api_settings.max_tokens,
+            streaming=True,
+            callback_manager=stream_manager,
+            verbose=True,
+        )
 
-    conversation_chain = ConversationChain(
-        callback_manager=manager, memory=memory, llm=streaming_llm, verbose=True, prompt=prompt
-    )
+        logger = get_logger(__name__)
+        logger.info(
+            "Created OpenAI Streaming with model name {}, temperature {}, max_tokens {}".format(
+                self.api_settings.model,
+                self.api_settings.temperature,
+                self.api_settings.max_tokens,
+            )
+        )
 
-    return conversation_chain
+        conversation_chain = self.build_conversation_chain(streaming_llm)
+
+        return conversation_chain
+
+
+class OpenAIFineTunedBackend(OpenAIBackend):
+    def __init__(self, model_name: str):
+        super().__init__()
+        self.api_settings.model = model_name

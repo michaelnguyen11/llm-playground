@@ -14,6 +14,7 @@ In the project, I used Langchain build to a conversation chain with memory and O
 
 ```bash
 llm-playground
+    ├───data <- models downloaded for localLLM
     ├───models <- dataset generation and fine-tuning GPT models.
     ├───src <- chat application using FastAPI with a WebSocket endpoint to interact with the GPT models.
     │   ├───api <- define router endpoints.
@@ -23,6 +24,12 @@ llm-playground
     │   └───utils <- ultility scripts.
     └───tests <- unittests for the project.
 ```
+
+## System Architecture
+
+![System Design and Architecture](./docs/system_architecture.png)
+
+
 
 ## Installation
 
@@ -49,6 +56,8 @@ docker-compose up -d
 ```
 Then, navigate to `http://0.0.0.0:8080` to chat with the Q/A virtual assistant
 
+Note : The LlamaCpp backend have not supported using docker-compose yet. [Reference](https://github.com/abetlen/llama-cpp-python/issues/244), I will find a workaround later.
+
 ### Local Python Environment
 Encourage to run in the virtual environments like `venv` or `conda`. To install dependency packages, use the command :
 ```
@@ -61,12 +70,18 @@ uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 Then, navigate to `http://0.0.0.0:8080` to chat with the Q/A virtual assistant
 
+#### Download models for localLLM
+To download models for LlamaCpp backend, navigate to [data](./data/) and run command :
+```
+./donwload_models.sh
+```
+Then change ENDPOINT_TYPE in `.env` to use `openai` or `llamacpp` websocket endpoint backend.
 
 ## Potential areas for improvement.
 1. Improve the data generation pipeline
 2. Explore more methods to evaluate fine-tuned LLM models.
 3. Implement RAG with Langchain for augmenting LLM knowledge with additional data
 4. Multiple LLM backends for LocalLLM, optimized for specific Hardware
-- [ ] [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) : MacOS Platforms
+- [x] [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) : MacOS Platforms
 - [ ] [intel-extension-for-transformers](https://github.com/intel/intel-extension-for-transformers) : Intel Platforms
 - [ ] [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) : Nvidia Platforms

@@ -1,8 +1,10 @@
+import os
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from src.integrations.openai import get_openai_chain, settings
 from src.schemas.message import ChatResponse
 from src.utils.callbacks import StreamingLLMCallbackHandler
 from src.utils.logger import get_logger
+from src.integrations.openai import OpenAIBackend
+from src.integrations.llamacpp import LlamaCppBackend
 
 logger = get_logger(__name__)
 
@@ -24,15 +26,29 @@ manager = ConnectionManager()
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
-    if not settings.OPENAI_API_KEY.startswith("sk-"):
+
+    # TODO : Add frontend option to choose between OpenAI and LlamaCpp
+    endpoint_type = os.environ.get("ENDPOINT_TYPE", "openai")
+    llm_backend = None
+    if endpoint_type == "llamacpp":
+        llm_backend = LlamaCppBackend()
+        if not llm_backend.api_settings.model.endswith(".gguf"):
+            await websocket.send_json({"error": "LLAMA MODEL is incorrect format"})
+            return
+    elif endpoint_type == "openai":
+        llm_backend = OpenAIBackend()
+        if not llm_backend.api_settings.key.startswith("sk-"):
             await websocket.send_json({"error": "OPENAI_API_KEY is not set"})
             return
+    else:
+        await websocket.send_json({"error": "Invalid endpoint type, supported: llamacpp, openai"})
+        return
 
     stream_hanlder = StreamingLLMCallbackHandler(websocket)
-    conversation_chain = get_openai_chain(stream_hanlder)
+    conversation_chain = llm_backend.get_chain(stream_hanlder)
     try:
         while True:
-             # Receive and send back the client message
+            # Receive and send back the client message
             user_msg = await websocket.receive_text()
             resp = ChatResponse(sender="human", message=user_msg, type="stream")
             await websocket.send_json(resp.dict())

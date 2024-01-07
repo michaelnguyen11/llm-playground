@@ -1,13 +1,12 @@
 import pytest
-import os
 from fastapi import WebSocketDisconnect
-from src.api.routers import websocket_endpoint, manager
+from src.api.routers import websocket_endpoint
 from unittest.mock import AsyncMock
 
 from unittest.mock import patch
 
 @pytest.mark.asyncio
-@patch('src.api.routers.get_openai_chain')
+@patch('src.api.routers.LlamaCppBackend')
 @patch('src.api.routers.StreamingLLMCallbackHandler')
 @patch('src.api.routers.manager.connect')
 async def test_websocket_endpoint_receives_and_sends_text(mock_connect, mock_handler, mock_chain):
@@ -18,11 +17,9 @@ async def test_websocket_endpoint_receives_and_sends_text(mock_connect, mock_han
     mock_connect.assert_called_once_with(mock_websocket)
 
 @pytest.mark.asyncio
-@patch('src.api.routers.get_openai_chain')
-@patch('src.api.routers.StreamingLLMCallbackHandler')
 @patch('src.api.routers.manager.connect')
 @patch('src.api.routers.manager.disconnect')
-async def test_websocket_endpoint_handles_disconnect(mock_disconnect, mock_connect, mock_handler, mock_chain):
+async def test_websocket_endpoint_handles_disconnect(mock_disconnect, mock_connect):
     mock_websocket = AsyncMock()
     mock_websocket.receive_text.side_effect = WebSocketDisconnect()
     await websocket_endpoint(mock_websocket)
@@ -30,10 +27,8 @@ async def test_websocket_endpoint_handles_disconnect(mock_disconnect, mock_conne
     mock_disconnect.assert_called_once_with(mock_websocket)
 
 @pytest.mark.asyncio
-@patch('src.api.routers.get_openai_chain')
-@patch('src.api.routers.StreamingLLMCallbackHandler')
 @patch('src.api.routers.manager.connect')
-async def test_websocket_endpoint_handles_exception(mock_connect, mock_handler, mock_chain):
+async def test_websocket_endpoint_handles_exception(mock_connect):
     mock_websocket = AsyncMock()
     mock_websocket.receive_text.side_effect = Exception()
     await websocket_endpoint(mock_websocket)
