@@ -1,8 +1,6 @@
 import os
-import sys
 import time
-from datetime import datetime
-import json
+import argparse
 
 import openai
 from openai import OpenAI
@@ -11,44 +9,77 @@ from validate_json import validate_json
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def launch_training(data_path: str) -> None:
-    validate_json(data_path)
-    
-    # TODO: figure out how to specify file name in the new API
-    # file_name = os.path.basename(data_path)
+
+def launch_training(finetuning_train_path: str, finetuning_val_path: str = None) -> None:
+    validate_json(finetuning_train_path)
+    if finetuning_val_path:
+        validate_json(finetuning_val_path)
 
     # upload file
-    with open(data_path, "rb") as f:
-        output = client.files.create(
+    with open(finetuning_train_path, "rb") as f:
+        train_output = client.files.create(
             file=f,
             purpose="fine-tune",
         )
+    train_file_id = train_output.id
 
-    # TODO: save output to json file
-    # client_output_metadata = 'openai_training_metadata_' + str(datetime.now().strftime('%Y_%m_%d_%H_%M_%S')) + '.json'
-    # with open(client_output_metadata, 'w') as f:
-    #     json.dump(output, f)
+    valid_file_id = None
+    if finetuning_val_path:
+        with open(finetuning_val_path, "rb") as f:
+            val_output = client.files.create(
+                file=f,
+                purpose="fine-tune",
+            )
+        valid_file_id = val_output.id
 
-    print("File uploaded. Launching training job with information : {}".format(output))
+    print("File uploaded. Launching training job with information : {}".format(train_output))
 
     # launch training
     while True:
         try:
             job_output = client.fine_tuning.jobs.create(
-                training_file=output.id,
+                training_file=train_file_id,
+                validation_file=valid_file_id,
                 model="gpt-3.5-turbo-1106",
                 suffix="hiep",
             )
-            print('Job output: {}'.format(job_output))
+            print("Job output: {}".format(job_output))
             break
         except openai.BadRequestError:
             print("Waiting for file to be ready...")
             time.sleep(60)
-    print(f"Training job {output.id} launched. You will be emailed when it's complete.")
+    print(
+        f"Training job {job_output.id} launched. You will be emailed when it's complete."
+    )
+
+    # # Retrieve the state of a fine-tune
+    # retrieve_training_info = client.fine_tuning.jobs.retrieve(job_output.id)
+    # print("retrieve training info : {}".format(retrieve_training_info))
+    # fine_tuned_model_id = retrieve_training_info["fine_tuned_model"]
+    # print("Fine-tuned model id : {}".format(fine_tuned_model_id))
+
+
+def parge_args():
+    parser = argparse.ArgumentParser(description="Dataset preparation for fine-tuning")
+    parser.add_argument(
+        "-tp",
+        "--train_path",
+        type=str,
+        default="datasets/finetuning_events_train.jsonl",
+        help="Path to finetuning events training in .jsonl format",
+    )
+    parser.add_argument(
+        "-vp",
+        "--val_path",
+        type=str,
+        help="Path to finetuning events evaluate in .jsonl format",
+    )
+    args = parser.parse_args()
+
+    return args
+
 
 if __name__ == "__main__":
-    data_path = sys.argv[1]
-    if not os.path.exists(data_path):
-        raise ValueError(f"Path {data_path} does not exist")
+    args = parge_args()
 
-    launch_training(data_path)
+    launch_training(args.train_path, args.val_path)

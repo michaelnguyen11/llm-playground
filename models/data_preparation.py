@@ -45,9 +45,11 @@ def questions_generator(
     """
     Generate questions from documents using OpenAI GPT models
     """
-    # question_generator(service_context, documents[:15], question_gen_query, 200, train_questions_file)
-    # question_generator(service_context, documents[15:], question_gen_query, 150, eval_questions_file)
-    question_generator(service_context, documents, question_gen_query, 200, train_questions_file)
+    # generate 50 questions on different sections of the PDF
+    question_generator(service_context, documents, question_gen_query, 50, train_questions_file)
+    # page 5->12 : 3. GENERATIVE AGENT BEHAVIOR AND INTERACTION and 4. GENERATIVE AGENT ARCHITECTURE
+    # page 12->18 : 5. SANDBOX ENVIRONMENT IMPLEMENTATION, 6. CONTROLLED EVALUATION, 7. END-TO-END EVALUATION, 8. DISCUSSION and 9.CONCLUSION
+    question_generator(service_context, documents[5:18], question_gen_query, 50, eval_questions_file)
 
 def dataset_generator(
         documents: SimpleDirectoryReader, 
@@ -61,8 +63,9 @@ def dataset_generator(
     finetuning_handler = OpenAIFineTuningHandler()
     callback_manager = CallbackManager([finetuning_handler])
 
+    # Use temperature of 0.0 because it gives the most predictable, factual answer.
     gpt_4_context = ServiceContext.from_defaults(
-        llm=OpenAI(model="gpt-4-1106-preview", temperature=0.3),
+        llm=OpenAI(model="gpt-4-1106-preview", temperature=0),
         context_window=2048,  # limit the context window artifically to test refine process
         callback_manager=callback_manager,
     )
@@ -107,7 +110,7 @@ def main():
     documents = load_documents(["docs/Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf"])
     question_gen_query = (
         "You are a Teacher/ Professor. Your task is to setup "
-        "a examination. Using the provided context, formulate "
+        "a quiz/examination. Using the provided context, formulate "
         "a single question that captures an important fact from the "
         "context. Restrict the question to the context information provided."
     )

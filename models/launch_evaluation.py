@@ -110,6 +110,8 @@ def parge_args():
                         help="Evaluate GPT-3.5-turbo fine tuned model")
     parser.add_argument("-e4", "--eval_gpt4", action="store_true",
                         help="Evaluate GPT-4 model")
+    parser.add_argument("-ea", "--eval_all", action="store_true",
+                        help="Evaluate all models : based GPT-3.5-turbo, finetuned GPT-3.5-turbo and GPT-4 model")
     parser.add_argument("-cr", "--compare_response", action="store_true",
                         help="Compare different responses between GPT-3.5-turbo baseline, finetuned and GPT-4 models")
     parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions_gpt4_generate.txt",
@@ -128,10 +130,11 @@ def main():
     # gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:aitomatic-inc:hiep:8clVbyfK'
     # The fine-tuned model trained with train questions generated from GPT-4
     gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:aitomatic-inc:hiep:8cuu5f77'
+    # gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:personal::8eY9TPw4'
     gpt_4_baseline = 'gpt-4-1106-preview'
 
     args = parge_args()
-    
+
     if args.eval_baseline:
         gpt_35_baseline_result = evaluate_gpt_model(documents=documents,
                                                     model_name=gpt_35_baseline,
@@ -148,6 +151,34 @@ def main():
                                                    model_name=gpt_4_baseline,
                                                    eval_questions_file=args.val_path)
         print('Evaluation model {} with Ragas results : {}'.format(gpt_4_baseline, gpt_4_baseline_result))
+    elif args.eval_all:
+        gpt_35_baseline_result = evaluate_gpt_model(documents=documents,
+                                                    model_name=gpt_35_baseline,
+                                                    eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_35_baseline, gpt_35_baseline_result))
+        gpt_35_tuned_result = evaluate_gpt_model(documents=documents,
+                                                 model_name=gpt_35_tuned,
+                                                 eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_35_tuned, gpt_35_tuned_result))
+        gpt_4_baseline_result = evaluate_gpt_model(documents=documents,
+                                                   model_name=gpt_4_baseline,
+                                                   eval_questions_file=args.val_path)
+        print('Evaluation model {} with Ragas results : {}'.format(gpt_4_baseline, gpt_4_baseline_result))
+
+        # Save to DF
+        eval_df = pd.DataFrame(
+            {
+                "Model Name": [gpt_35_baseline, gpt_35_tuned, gpt_4_baseline],
+                "Ragas Answer Selevancy Score": [gpt_35_baseline_result['answer_relevancy'],
+                                                 gpt_35_tuned_result['answer_relevancy'],
+                                                 gpt_4_baseline_result['answer_relevancy']],
+                "Ragas Faithfulness Score": [gpt_35_baseline_result['faithfulness'],
+                                             gpt_35_tuned_result['faithfulness'],
+                                             gpt_4_baseline_result['faithfulness']],
+            },
+        )
+        eval_df.to_csv('evaluate_all_models.csv', index=False)
+        print(eval_df)
     elif args.compare_response:
         question = get_question(questions_file=args.val_path, question_number=12)
         gpt_35_answer = get_response(documents=documents,
