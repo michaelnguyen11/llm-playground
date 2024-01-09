@@ -54,7 +54,7 @@ def questions_generator(
 def dataset_generator(
         documents: SimpleDirectoryReader, 
         train_questions_file='datasets/train_questions.txt', 
-        output_finetuning_file='datasets/finetuning_events.jsonl'):
+        output_finetuning_file='datasets/finetuning_events_train.jsonl'):
     """
     Generate dataset for fine-tuning from generated questions using GPT-4
     """
@@ -93,11 +93,11 @@ def parge_args():
                         help="Generate train/val questions using GPT models")
     parser.add_argument("-d", "--dataset", action="store_true",
                         help="Generate train/val datasets using GPT models")
-    parser.add_argument("-tp", "--train_path", type=str, default="datasets/train_questions_gpt4_generate.txt",
+    parser.add_argument("-tp", "--train_path", type=str, default="datasets/train_questions.txt",
                         help="Path to save train questions in .txt format")
-    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions_gpt4_generate.txt",
+    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions.txt",
                         help="Path to save val questions in .txt format")  
-    parser.add_argument("-ftp", "--finetune_path", type=str, default="datasets/finetuning_events_gpt4_100_questions.jsonl",
+    parser.add_argument("-ftp", "--finetune_path", type=str, default="datasets/finetuning_events_train.jsonl",
                         help="Path to save finetuning events in .jsonl format")
     args = parser.parse_args()
 

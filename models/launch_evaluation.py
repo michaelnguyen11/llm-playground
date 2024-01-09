@@ -114,7 +114,7 @@ def parge_args():
                         help="Evaluate all models : based GPT-3.5-turbo, finetuned GPT-3.5-turbo and GPT-4 model")
     parser.add_argument("-cr", "--compare_response", action="store_true",
                         help="Compare different responses between GPT-3.5-turbo baseline, finetuned and GPT-4 models")
-    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions_gpt4_generate.txt",
+    parser.add_argument("-vp", "--val_path", type=str, default="datasets/eval_questions.txt",
                         help="Path to save val questions in .txt format")
     parser.add_argument("-rf", "--response_file", type=str, default="compare_responses.csv",
                         help="Save compare responses between models in .csv format")
