@@ -126,7 +126,11 @@ def main():
     documents = load_documents(["docs/Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf"])
 
     gpt_35_baseline = 'gpt-3.5-turbo-1106'
-    gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:personal::8eY9TPw4'
+    # The fine-tuned model trained with train questions generated from GPT-3.5-turbo-1106
+    # gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:aitomatic-inc:hiep:8clVbyfK'
+    # The fine-tuned model trained with train questions generated from GPT-4
+    gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:aitomatic-inc:hiep:8cuu5f77'
+    # gpt_35_tuned = 'ft:gpt-3.5-turbo-1106:personal::8eY9TPw4'
     gpt_4_baseline = 'gpt-4-1106-preview'
 
     args = parge_args()
