@@ -1,5 +1,3 @@
-# FILEPATH: /Users/hiep/Desktop/Workspace/aitomatic_test/llm-playground/tests/utils/test_callbacks.py
-
 import pytest
 from unittest.mock import AsyncMock
 from src.utils.callbacks import StreamingLLMCallbackHandler
